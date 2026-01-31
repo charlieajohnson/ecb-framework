@@ -1,16 +1,598 @@
+% !TEX program = pdflatex
 \documentclass[11pt]{article}
-\usepackage{amsmath,amssymb}
-\usepackage{geometry}
-\geometry{margin=1in}
 
-\title{Effective Capital Blueprint (ECB)}
-\author{Charlie A. Johnson}
-\date{\today}
+% ---------- Layout & Math ----------
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+
+% ---------- Tables / Lists / Typography ----------
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{microtype}
+
+% ---------- Boxes / Figures ----------
+\usepackage{tcolorbox}
+\tcbuselibrary{breakable}
+\tcbset{lines before break=4}
+\usepackage{graphicx}
+
+% ---------- Version ----------
+\newcommand{\version}{Version 0.1}
+
+% ---------- PDF metadata + links (load once, near end) ----------
+\usepackage[
+  pdfauthor={Charlie A. Johnson},
+  pdftitle={Latency and the Effective Capital Blueprint (ECB)},
+  pdfsubject={Effective Capital Blueprint; coordination latency; feasible action sets},
+  pdfkeywords={ECB, coordination latency, transaction costs, coordination, economic geography},
+  colorlinks=true,
+  linkcolor=blue,
+  urlcolor=blue,
+  citecolor=blue
+]{hyperref}
+
+% ---------- Footer ----------
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[C]{\footnotesize Latency and the Effective Capital Blueprint (ECB) --- Charlie A. Johnson --- \version}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% ---------- Theorem Environments ----------
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+
+% ---------- Notation Macros ----------
+\newcommand{\X}{\mathcal{X}}
+\newcommand{\ECB}{\mathrm{ECB}}
+\newcommand{\Leff}{L_{\mathrm{eff}}}
+\newcommand{\Rplus}{\mathbb{R}_{+}}
+
+% ---------- Title ----------
+\title{Latency and the Effective Capital Blueprint (ECB)}
+\author{Charlie A. Johnson\\Independent Research\\\texttt{research@charlieajohnson.com}}
+\date{January 31, 2026\\[0.4em]\version}
 
 \begin{document}
 \maketitle
+\thispagestyle{empty} % remove footer from title page only
+
+\begin{abstract}
+Models of personal efficacy---from lifecycle consumption theory to portfolio choice---typically treat feasible action sets as expanding monotonically in wealth. Yet empirical patterns contradict this: entrepreneurs relocate and reverse course, high-net-worth individuals exhibit constrained portfolios, and operational scope narrows despite capital abundance. This paper introduces the \emph{Effective Capital Blueprint} (ECB): the feasible action set an actor can execute given capital, coordination latency, and actor constraints. Our central result is that \emph{coordination latency imposes non-compensable constraints on agency}: beyond latency thresholds, entire classes of coordination-critical actions are excluded from the feasible set regardless of capital availability. We show that coordination-critical actions requiring multiple feedback cycles exhibit threshold exclusion: small latency increases beyond action-specific thresholds cause discontinuous exit from the feasible set, with no capital-based restoration mechanism. In calibrated examples, tripling effective latency (from 2.2 to 7.7 days per cycle) reduces feasible iteration-intensive actions by approximately 65\%, independent of capital levels. This challenges capital-centric models of personal efficacy and provides a formal foundation for observed clustering patterns that existing theories often treat as preference-driven or productivity-based. We derive testable predictions regarding portfolio composition, relocation reversals, and ecosystem persistence that distinguish latency-based from alternative explanations.
+% Empirical hook placeholder (replace once verified with actual stats):
+Preliminary empirical tabulations on relocation events can be used to test these signatures at scale (see Section~\ref{sec:empirics}).
+These results imply that ecosystem persistence, geographic clustering, and relocation patterns reflect structural constraints on feasible action sets rather than amenity preferences or agglomeration externalities alone.
+\end{abstract}
+
+\vspace{0.5em}
+
+\section*{Notation}
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+Symbol & Meaning \\
+\midrule
+$\X$ & Universe of possible actions \\
+$x$ & An action (or action class) \\
+$C$ & Available capital \\
+$\mathbf{L}$ & Latency vector $(L_1,\dots,L_n)$ \\
+$\Leff$ & Aggregate effective latency \\
+$f(\Leff)$ & Increasing mapping from latency to cycle delay \\
+$t_{\mathrm{internal}}(x)$ & Minimum internal processing time absent coordination delay \\
+$\theta$ & Actor constraints (cognitive, temporal, expertise) \\
+$\ECB(C,\mathbf{L},\theta)$ & Effective Capital Blueprint (feasible action set) \\
+$C^*$ & Capital saturation threshold \\
+$L_x^*$ & Latency exclusion threshold for action $x$ \\
+$k(x)$ & Feedback cycles required for action $x$ \\
+$t_{\mathrm{cycle}}$ & Cycle time including latency \\
+$\delta_{\mathrm{PA}}$ & Principal--agent coordination delay \\
+$\delta_{\mathrm{coord}}$ & Multi-party coordination overhead \\
+$D(d)$ & Context/domicile latency multiplier at context $d$ \\
+$\varepsilon_x$ & Latency elasticity of feasibility of action $x$ \\
+$T$ & Deadline window / time horizon \\
+$B$ & Actor cognitive bandwidth \\
+\bottomrule
+\end{tabular}
+\end{center}
 
 \section{Introduction}
-% Main paper content here
+Why do actors with substantial capital exhibit sharply constrained agency? Conventional intuition treats capital as the primary constraint on action. Yet observed patterns suggest saturation: relocations reverse, portfolios narrow, and operational scope contracts---often without capital loss.
+
+We propose that personal efficacy is bounded not by capital but by the \emph{Effective Capital Blueprint} (ECB)---the feasible action set reachable within cognitive, temporal, and institutional limits. Coordination latency contracts this set nonlinearly and, for coordination-critical actions, \emph{non-compensably}.
+
+\subsection{Contributions}
+\begin{enumerate}[leftmargin=*, itemsep=0.25em]
+  \item \textbf{Theoretical:} Formalizes ECB as a set-valued function and establishes capital saturation and latency non-compensability under general conditions.
+  \item \textbf{Empirical:} Derives predictions, measurement proxies, and identification strategies distinguishing latency-based constraints from preference- or productivity-based explanations.
+  \item \textbf{Integrative:} Unifies transaction cost economics, institutional execution constraints, coordination theory, and spatial finance under a common feasibility-set lens.
+\end{enumerate}
+
+\subsection{Relation to Capital--Efficacy Literature}
+Prior work relates capital to efficacy via (i) direct affordability, (ii) signaling/access, and (iii) risk-bearing capacity. ECB framework does not contest these mechanisms. It identifies a fourth channel operating independently: \emph{latency-constrained feasibility}. Under ECB, capital can be abundant and well-signaled yet still yield collapsed agency if coordination latency is high.
+
+\subsection{Paper Outline}
+Section~\ref{sec:concept} motivates the framework. Section~\ref{sec:ecb} formalizes ECB and core definitions, then states assumptions. Section~\ref{sec:latency} structures coordination latency. Sections~\ref{sec:props}--\ref{sec:control} develop the main results: capital saturation (Proposition~\ref{prop:saturation}), latency exclusion (Proposition~\ref{prop:exclusion}), and non-compensability (Proposition~\ref{prop:noncomp}), with comparative statics and control-theoretic grounding. Section~\ref{sec:domicile} models context as a latency multiplier. Section~\ref{sec:empirics} derives empirical predictions, robustness, and identification strategies. Sections~\ref{sec:calibration}--\ref{sec:lit} provide calibration/sensitivity and literature positioning. Sections~\ref{sec:extensions}--\ref{sec:conclusion} discuss extensions, welfare interpretation, and policy implications. Appendices include a referee-facing FAQ and implementation notes.
+
+\section{Conceptual Framework}\label{sec:concept}
+\subsection{Motivation}
+Two actors with identical capital can exhibit dramatically different agency across contexts. We argue this reflects latency-driven contraction of feasible action sets, not merely heterogeneous preferences or productivity.
+
+\subsection{Defining Personal Efficacy}
+\textbf{Personal Efficacy} is the capacity to convert intent into outcomes \emph{quickly, predictably, and reversibly}, subject to real-world constraints. Efficacy derives from the \emph{size and composition} of the feasible action set, not wealth in isolation.
+
+\section{The Effective Capital Blueprint (ECB)}\label{sec:ecb}
+\subsection{ECB as a Set-Valued Function}
+Let $\X$ denote the universe of theoretically possible actions. Let $C \in \Rplus$ be available capital, $\mathbf{L}\in \Rplus^n$ a latency vector, and $\theta$ actor constraints. Define:
+\[
+\ECB(C,\mathbf{L},\theta) \subseteq \X
+\]
+An action $x\in \X$ is in $\ECB$ iff it satisfies:
+\begin{enumerate}[leftmargin=*, itemsep=0.25em]
+  \item \textbf{Capital feasibility:} $\mathrm{cost}(x)\le C$
+  \item \textbf{Latency feasibility:} $\mathrm{time}(x;\mathbf{L})\le T(\theta)$
+  \item \textbf{Cognitive feasibility:} $\mathrm{load}(x;\mathbf{L})\le B(\theta)$
+\end{enumerate}
+ECB captures \emph{reachability}, not theoretical affordability.
+
+\subsection{ECB Size Metric (Commitment)}
+For theory, define ECB size by cardinality:
+\[
+\bigl|\ECB(C,\mathbf{L},\theta)\bigr|
+\]
+For empirics, use an outcome-weighted analogue:
+\[
+V(\ECB)=\sum_{x\in \ECB} v(x)
+\]
+Results extend to any monotonic aggregation over $\ECB$.
+
+\subsection{Action Classification Preliminaries: Coordination-Critical Actions}\label{sec:coordcritical}
+An action $x$ is \textbf{coordination-critical} if it requires $k(x)\ge k_{\min}$ decision--feedback cycles to complete within deadline $T$, where each cycle entails: (i) decision/action execution, (ii) observation of outcome/state, and (iii) adjustment based on feedback.
+
+Define cycle time under latency $\mathbf{L}$:
+\[
+t_{\mathrm{cycle}}(x;\mathbf{L}) = t_{\mathrm{internal}}(x) + f(\Leff),
+\]
+where $f(\cdot)$ is increasing and $t_{\mathrm{internal}}(x)$ is minimum internal processing time absent coordination delays.
+
+An action is coordination-critical when:
+\[
+k(x)\ge k_{\min} \quad \text{and} \quad k(x)\, t_{\mathrm{cycle}}(x;\mathbf{L}) \approx T,
+\]
+i.e., feasibility is tight with respect to coordination rounds rather than internal processing.
+
+\begin{tcolorbox}[breakable, title=Box 1: Concrete ECB Example]
+Throughout this paper, we use archetypal contexts rather than specific geographic locations to emphasize that ECB mechanisms operate independently of particular places. The framework applies to any context pair with different latency multipliers $D(\cdot)$, whether driven by geography, institutional design, or organizational structure.
+
+\vspace{0.5em}
+Consider an early-stage founder with $C=\$2$M.
+
+\textbf{Abstract Hub (low-latency, high-density context; $D=1.0$ by construction):}
+ECB includes daily synchronous iteration, rapid user testing ($\sim$3-day cycles), same-day legal iteration, and $<24$h settlement responses. Illustratively $|\ECB|\approx 40$ concurrent action types.
+
+\textbf{Remote Periphery (high-latency, asynchronous context; $D\approx 3.5$):}
+Capital unchanged. ECB loses daily synchronous iteration (async substitutes fail), rapid testing cycles (7+ day minima), and fast legal feedback (multi-day response). Illustratively $|\ECB|\approx 22$ action types ($\sim$45\% reduction).
+
+\textbf{Key insight:} nominal resources are unchanged, but entire action classes become unreachable due to latency alone.
+\end{tcolorbox}
+
+\subsection{Key Assumptions}\label{sec:assumptions}
+\textbf{A1 (Time--latency relationship):} completion time is weakly increasing in effective latency:
+\[
+\frac{\partial \mathrm{time}(x;\mathbf{L})}{\partial \Leff}\ge 0.
+\]
+\textbf{A2 (Load--latency relationship):} monitoring/adjustment load increases with latency:
+\[
+\frac{\partial \mathrm{load}(x;\mathbf{L})}{\partial \Leff}\ge 0.
+\]
+\textbf{A3 (Finite actor constraints):} $T(\theta)<\infty$ and $B(\theta)<\infty$.
+\\
+\textbf{A4 (Action discreteness):} actions are discrete, distinct units (not infinitely divisible).
+\\
+\textbf{A5 (Delegation increases latency):} deploying capital via delegation introduces coordination delays:
+\[
+\delta_{\mathrm{PA}}\ge 0,\quad \delta_{\mathrm{coord}}\ge 0,
+\]
+with at least one strict inequality for coordination-intensive actions.
+
+\section{Coordination Latency: Structure and Aggregation}\label{sec:latency}
+\subsection{Latency Vector}
+Coordination latency is modeled as $\mathbf{L}=(L_1,\dots,L_n)$ representing communication delay, time-zone misalignment, institutional response, settlement, verification, etc.
+
+\subsection{Aggregation into Effective Latency}
+For tractability:
+\[
+\Leff=\sum_{i=1}^n w_i L_i \quad \text{with } w_i>0.
+\]
+Alternative aggregations (Appendix) include multiplicative compounding $\prod_i(1+\alpha_i L_i)$ and bottleneck $\max_i L_i$.
+
+\section{Main Results}\label{sec:props}
+
+\subsection{Capital Saturation}
+\begin{proposition}[Capital Saturation]\label{prop:saturation}
+For fixed $\mathbf{L}$ and $\theta$, there exists $C^*<\infty$ such that:
+\[
+\ECB(C,\mathbf{L},\theta)=\ECB(C^*,\mathbf{L},\theta)\quad \forall C>C^*.
+\]
+\end{proposition}
+
+\noindent\textbf{Proof (deductive structure).}
+\begin{enumerate}[leftmargin=*, itemsep=0.25em]
+\item Let $T$ denote the actor deadline window and $B$ cognitive bandwidth (A3).
+\item Define minimum completion time among latency-feasible actions:
+\[
+t_{\min}(\mathbf{L})=\min\{\mathrm{time}(x;\mathbf{L}) : x\in\X,\ \mathrm{time}(x;\mathbf{L})\le T\}.
+\]
+\item The maximum number of actions executable within $T$ is bounded:
+\[
+N_T \le \left\lfloor \frac{T}{t_{\min}(\mathbf{L})}\right\rfloor.
+\]
+\item Cognitive feasibility imposes a second bound. Let $b_{\min}$ be minimum attention per action:
+\[
+N_B \le \left\lfloor \frac{B}{b_{\min}}\right\rfloor.
+\]
+\item Thus $|\ECB|$ is bounded above by $N_{\max}=\min(N_T,N_B)$, independent of $C$ beyond affordability.
+\item By A4 (action discreteness), the set of actions satisfying latency and cognitive constraints is finite; each has finite cost $\mathrm{cost}(x)<\infty$. Therefore:
+\[
+C^*=\max\{\mathrm{cost}(x): x\in\X,\ \mathrm{time}(x;\mathbf{L})\le T,\ \mathrm{load}(x;\mathbf{L})\le B\}
+\]
+exists and is finite (maximum over finite set).
+\item For any $C\ge C^*$, all latency- and cognitive-feasible actions are affordable, hence $\ECB(C,\mathbf{L},\theta)=\ECB(C^*,\mathbf{L},\theta)$. \hfill $\square$
+\end{enumerate}
+
+\begin{tcolorbox}[breakable, colback=gray!5, colframe=gray!40, title=Key Takeaway]
+Capital saturates. Beyond $C^*$, more money does not expand what you can do---it only makes already-feasible actions easier to fund.
+\end{tcolorbox}
+
+\subsection{Action Type Preview (avoid forward reference)}
+We classify actions by latency sensitivity (formalized in Section~\ref{sec:taxonomy}):
+\begin{itemize}[leftmargin=*, itemsep=0.2em]
+\item \textbf{Type I (latency-insensitive):} feasibility largely unaffected by $\Leff$.
+\item \textbf{Type II (latency-sensitive):} feasibility declines smoothly with $\Leff$, partially compensable by capital.
+\item \textbf{Type III (latency-critical):} discrete exclusion beyond threshold $L_x^*$, non-compensable by capital.
+\end{itemize}
+Proposition~\ref{prop:noncomp} establishes non-compensability for Type III actions.
+
+\subsection{Latency Exclusion}
+\begin{proposition}[Latency Exclusion]\label{prop:exclusion}
+Let $\mathbf{L}'$ differ from $\mathbf{L}$ such that $\Leff' \ge \Leff$. Then:
+\[
+\ECB(C,\mathbf{L}',\theta)\subseteq \ECB(C,\mathbf{L},\theta).
+\]
+Strict containment holds for non-trivial latency increases affecting at least one binding constraint for the given $(C,\theta)$.\footnote{Equality occurs only when the marginal latency increase affects solely non-binding components for the given $(C,\theta)$.}
+Moreover, there exist coordination-critical actions $X_{\mathrm{crit}}\subset \X$ such that:
+\[
+X_{\mathrm{crit}}\cap \ECB(C,\mathbf{L}',\theta)=\emptyset \quad \text{even as } C\to\infty.
+\]
+\end{proposition}
+
+\noindent\textbf{Proof (structure).}
+\begin{enumerate}[leftmargin=*, itemsep=0.25em]
+\item By A1, for any action $x$, $\mathrm{time}(x;\mathbf{L}') \ge \mathrm{time}(x;\mathbf{L})$ when $\Leff' \ge \Leff$.
+\item If $x \in \ECB(C,\mathbf{L},\theta)$, then $\mathrm{time}(x;\mathbf{L})\le T$. Since $\mathrm{time}(x;\mathbf{L}') \ge \mathrm{time}(x;\mathbf{L})$, either:
+  \begin{itemize}[leftmargin=*, itemsep=0.15em]
+  \item $\mathrm{time}(x;\mathbf{L}') > T$, implying $x \notin \ECB(C,\mathbf{L}',\theta)$ (latency infeasibility), or
+  \item $\mathrm{time}(x;\mathbf{L}') \le T$ but $\mathrm{load}(x;\mathbf{L}') > B$ (by A2), implying $x \notin \ECB(C,\mathbf{L}',\theta)$ (cognitive infeasibility).
+  \end{itemize}
+\item Therefore $\ECB(C,\mathbf{L}',\theta)\subseteq \ECB(C,\mathbf{L},\theta)$.
+\item For coordination-critical action classes $X_{\mathrm{crit}}$ requiring $k$ cycles within $T$, if $k(t_{\mathrm{base}}+f(\Leff'))>T$ but $k(t_{\mathrm{base}}+f(\Leff))\le T$, then $X_{\mathrm{crit}}\cap \ECB(C,\mathbf{L}',\theta)=\emptyset$ regardless of $C$ (time constraint binds independently of capital). \hfill $\square$
+\end{enumerate}
+
+\subsection{Non-Compensability}
+\begin{proposition}[Non-Compensability for Coordination-Critical Actions]\label{prop:noncomp}
+Let $X_{\mathrm{crit}}$ be actions requiring $k$ decision--feedback cycles within deadline $T$. Define:
+\[
+t_{\mathrm{cycle}}(\Leff)=t_{\mathrm{base}}+f(\Leff),
+\]
+where $f(\cdot)$ is strictly increasing (A1--A2). Feasibility requires:
+\[
+k\, t_{\mathrm{cycle}}(\Leff)\le T.
+\]
+Define threshold $L^*$ by:
+\[
+k\,(t_{\mathrm{base}}+f(L^*))=T.
+\]
+Then for $\Leff > L^*$:
+\[
+X_{\mathrm{crit}}\cap \ECB(C,\mathbf{L},\theta)=\emptyset \quad \forall C<\infty.
+\]
+\end{proposition}
+
+\noindent\textbf{Proof (deductive structure).}
+\begin{enumerate}[leftmargin=*, itemsep=0.25em]
+\item If $\Leff > L^*$, then $k(t_{\mathrm{base}}+f(\Leff))>T$, so direct execution violates the deadline.
+\item \textbf{Capital deployment via delegation:} the only plausible capital-based restoration mechanism is offloading work to hired agents (delegation/subcontracting).
+\item By A5, delegation introduces nonnegative delays: principal--agent delay $\delta_{\mathrm{PA}}(k)\ge 0$ and coordination overhead $\delta_{\mathrm{coord}}(k)\ge 0$. For coordination-intensive actions (high $k$), at least one is strictly positive.
+\item Effective cycle time under delegation is:
+\[
+t'_{\mathrm{cycle}} = t_{\mathrm{base}}+f(\Leff)+\delta_{\mathrm{PA}}(k)+\delta_{\mathrm{coord}}(k).
+\]
+\item Since $\delta_{\mathrm{PA}}+\delta_{\mathrm{coord}}>0$ for Type III actions:
+\[
+k\, t'_{\mathrm{cycle}} > k(t_{\mathrm{base}}+f(\Leff)) > T,
+\]
+so delegation worsens feasibility.
+\item Thus no finite capital can restore feasibility once $\Leff>L^*$. \hfill $\square$
+\end{enumerate}
+
+\begin{tcolorbox}[breakable, colback=gray!5, colframe=gray!40, title=Key Takeaway]
+For coordination-critical actions, latency thresholds create hard walls. Once crossed, no amount of capital restores feasibility.
+\end{tcolorbox}
+
+\subsection{Comparative Statics Summary}
+\begin{center}
+\begin{tabular}{@{}llll@{}}
+\toprule
+Parameter & Effect on ECB size & Magnitude & Most affected \\
+\midrule
+$\uparrow C$ & $+$ below $C^*$, $0$ above $C^*$ & Saturating & Type I initially \\
+$\uparrow \Leff$ & $-$ monotone & Nonlinear / threshold & Type III $>$ II $>$ I \\
+$\uparrow B$ & $+$ & Linear--sublinear & Type II \\
+$\uparrow T$ & $+$ & Linear & Type III \\
+$\uparrow D(d)$ & $-$ via latency & Multiplicative & All \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Action Taxonomy and Measurement}\label{sec:taxonomy}
+\subsection{Latency Elasticity}
+Let $P_x=\Pr[x\in \ECB(C,\mathbf{L},\theta)]$ and define:
+\[
+\varepsilon_x = -\left(\frac{dP_x}{d\Leff}\right)\left(\frac{\Leff}{P_x}\right).
+\]
+
+\subsection{Formal Classification}
+Define latency threshold:
+\[
+L_x^*=\inf\{\Leff: x\notin \ECB(C,\mathbf{L},\theta)\ \text{for } C\ \text{sufficiently large}\}.
+\]
+Type I: $L_x^*=\infty$ and $\varepsilon_x\approx 0$.
+Type II: $0<L_x^*<\infty$ and $\varepsilon_x$ finite.
+Type III: $L_x^*<\infty$ and $\lim_{\Leff\to L_x^*}\varepsilon_x=\infty$.
+
+\subsection{Empirical Operationalization}
+Estimate latency sensitivity using completion probabilities:
+\[
+\hat{\varepsilon}_x = -\frac{\Delta \Pr[x\ \mathrm{completed}]}{\Delta \Leff}\cdot
+\frac{\overline{\Leff}}{\overline{\Pr[x\ \mathrm{completed}]}}.
+\]
+
+\noindent\textbf{Concrete application (worked example).}
+Consider a ``contract negotiation'' action requiring $k=5$ rounds of revision within a $T=30$ day window.
+\begin{itemize}[leftmargin=*, itemsep=0.2em]
+\item Low-$L$ regime ($D=1.0$): $\Leff=2.2$ days $\Rightarrow$ completion time $\approx 11$ days; completed $\approx 0.95$ within $T$.
+\item High-$L$ regime ($D=3.5$): $\Leff=7.7$ days $\Rightarrow$ completion time $\approx 38.5$ days; completed $\approx 0.05$ within $T$.
+\end{itemize}
+
+\noindent Estimated elasticity:
+\[
+\hat{\varepsilon}_x
+= -\left[\frac{0.05-0.95}{7.7-2.2}\right]\cdot \frac{(7.7+2.2)/2}{(0.95+0.05)/2}
+= -\left[\frac{-0.90}{5.5}\right]\cdot \left[\frac{4.95}{0.5}\right]
+= 0.164\cdot 9.9
+\approx 1.6.
+\]
+This places the action in Type II (finite positive elasticity between 0.1 and 5). For actions requiring $k\ge 10$ rapid iterations (Type III), completion probabilities fall discontinuously to near-zero, implying $\hat{\varepsilon}_x\to\infty$.
+
+\subsection{Algorithmic Type Classification (implementable)}
+\begin{tcolorbox}[breakable, title=Algorithm 1: Action Type Classification]
+\textbf{Input:} action $x$, panel data of completion outcomes across observed $\Leff$ values \\
+\textbf{Output:} Type I / II / III classification
+\begin{enumerate}[leftmargin=*, itemsep=0.2em]
+\item Estimate $P(x\mid \Leff)$ using logistic regression or a flexible spline model.
+\item Compute numerical derivative $dP/d\Leff$ at median $\Leff$.
+\item Compute $\hat{\varepsilon}_x$ at median $\Leff$.
+\item If $\hat{\varepsilon}_x < 0.1$, classify Type I.
+\item Else if decline is smooth with finite $\hat{\varepsilon}_x$, classify Type II.
+\item Else if a discontinuity is detected (e.g., likelihood ratio test comparing threshold vs smooth models), classify Type III.
+\end{enumerate}
+\textbf{Computational complexity:} For $N$ observations and $G$ grid points in $\Leff$, step 1 requires $O(N\log N)$ for logistic regression (typical solvers) or $O(NG)$ for spline fitting. Steps 2--6 are $O(G)$. Total runtime is $O(N\log N + NG)$, feasible for typical empirical datasets.
+\end{tcolorbox}
+
+\section{Formal Foundations: Control-Theoretic Grounding}\label{sec:control}
+ECB connects formally to control theory via stability and gain--bandwidth limitations.
+
+Model efficacy as a feedback control system with observation delay $\tau=\Leff$ (feedback delay in the control-theoretic sense). A standard inverse-delay gain limitation (see, e.g., Åström \& Murray; Franklin, Powell \& Emami-Naeini) implies that for frequency $\omega$ when $\omega\tau>1$:
+\[
+|G_{\max}(\omega)| \le \frac{1}{\omega \tau}.
+\]
+Type III actions have high natural frequency $\omega_n$ (tight control requirements). When $\Leff\cdot \omega_n>1$, the system becomes effectively unstable/uncontrollable regardless of control effort (capital), providing a control-theoretic foundation for Proposition~\ref{prop:noncomp}.
+
+\section{Context as a Latency Multiplier}\label{sec:domicile}
+Let $d\in\Omega$ denote a context. Let $D:\Omega\to\Rplus$ map context to a systematic latency multiplier:
+\[
+L_i(d)=D(d)\cdot L_i^{\mathrm{base}}+\varepsilon_i(d),
+\]
+with aggregate:
+\[
+\Leff(d)=D(d)\cdot \Leff^{\mathrm{base}}+\sum_i w_i\varepsilon_i(d).
+\]
+Thus $\ECB(C,\mathbf{L}(d_1),\theta)$ can differ dramatically from $\ECB(C,\mathbf{L}(d_2),\theta)$ even when $C$ and $\theta$ are identical.
+
+\section{Empirical Implications, Identification, and Robustness}\label{sec:empirics}
+\subsection{Predictions}
+(i) Portfolio narrowing with higher $\Leff$ even at high $C$; (ii) turnover suppression; (iii) threshold exclusion for Type III near $L_x^*$; (iv) reversibility premia rise with $\Leff$; (v) relocation reversals when $\Leff$ increases.
+
+\subsection{Identification}
+Within-actor relocation event study / DID:
+\[
+\Delta \ECB = \beta_0 + \beta_1 \Delta \Leff + \beta_2 \Delta C + \text{controls} + \epsilon,
+\]
+expecting $\beta_1<0$.
+
+\subsection{Robustness: Addressing Alternative Explanations}
+\begin{itemize}[leftmargin=*, itemsep=0.2em]
+\item \textbf{Reverse causality:} declining ECB might precede relocation. Test pre-trends; ECB predicts flat pre-trends and sharp post-change. Placebo: relocations between similar-$\Leff$ contexts should show no ECB change.
+\item \textbf{Omitted variables:} unobserved shocks could correlate with relocation and ECB. Restrict to plausibly forced relocations. Use institutional shocks as instruments for $\Leff$.
+\item \textbf{Measurement error:} self-reports noisy. Validate with objective proxies (transaction logs; calendar density; contract cycle times).
+\end{itemize}
+
+\subsection{Power (Illustrative)}
+To detect $\beta_1=-0.20$ with power 0.80, $\alpha=0.05$, within-actor correlation $\rho=0.6$, residual variance $\sigma^2=0.04$ requires approximately $N\approx 85$ relocation events. Threshold-focused Type III tests may require $N\approx 40$ under sharp discontinuity.
+
+\section{Calibration and Sensitivity}\label{sec:calibration}
+Tripling $\Leff$ from 2.2 to 7.7 days per cycle reduces feasible iteration capacity from $\sim 13$ to $\sim 4$ cycles per month. Type III actions requiring more than 4 iterations become infeasible independent of $C$, consistent with the $\sim 65\%$ reduction anchor used in the abstract. Sensitivity: $L^*$ scales linearly in $T$ and $t_{\mathrm{base}}$, and inversely in $k$.
+
+\section{Relation to Existing Literature and Gap}\label{sec:lit}
+ECB bridges transaction cost economics (Coase; Williamson), institutional economics (North; Acemoglu \& Johnson), coordination theory (Thompson; Galbraith; Malone \& Crowston), geography of finance (Coval \& Moskowitz; Petersen \& Rajan), remote work (Bloom et al.; Emanuel \& Harrington), and agglomeration (Duranton \& Puga; Ellison et al.).
+
+\subsection*{Gap this paper fills (specific)}
+Existing frameworks face three limitations ECB resolves:
+\begin{enumerate}[leftmargin=*, itemsep=0.2em]
+\item \textbf{Transaction cost theory} treats costs as compensable with resources; ECB shows latency creates hard constraints where delegation increases the constraint via $\delta_{\mathrm{PA}}$ and $\delta_{\mathrm{coord}}$.
+\item \textbf{Geography of finance} attributes distance effects to information asymmetry; ECB shows direct feasibility loss even with perfect information.
+\item \textbf{Agglomeration theory} explains clustering via productivity spillovers; ECB adds a non-additive mechanism: departure is infeasible for Type III actors when alternatives have $\Leff>L^*$.
+\end{enumerate}
+\noindent\textbf{Additional distinction (remote work boundary):} Remote work evidence can show output-per-hour remains high for some tasks, yet ECB predicts a bifurcation: Type I tasks remain feasible, while Type III tasks can become infeasible (discrete exclusion) even absent a productivity decline.
+
+\section{Extensions}\label{sec:extensions}
+(i) Obligation load $\Omega$ in $\ECB(C,\mathbf{L},\theta,\Omega)$; (ii) dynamic $\theta$ and endogenous network formation reducing some $L_i$; (iii) multi-actor ECB with internal latency.
+
+\subsection{Actor heterogeneity in ECB sensitivity}
+\begin{center}
+\begin{tabular}{@{}llll@{}}
+\toprule
+Actor class & Dominant action types & ECB sensitivity to $\Leff$ & Typical $C^*$ \\
+\midrule
+Passive investors & Type I & Low & Low \\
+Content creators & Type I & Low & Medium \\
+Service professionals & Type II & Medium & Medium \\
+Entrepreneurs & Type III & High & High \\
+Active portfolio managers & Type II--III & High & Very high \\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent\textbf{Prediction:} relocation effects concentrate among high-$k$ actors with near-zero effects for low-$k$ populations.
+
+\section{Conclusion}\label{sec:conclusion}
+Personal efficacy is constrained by ECB---the feasible action set reachable within cognitive, temporal, and institutional limits. Capital saturates in its ability to expand ECB. Coordination latency contracts ECB and, for coordination-critical actions, does so non-compensably: once latency crosses thresholds, no finite capital restores feasibility.
+
+\subsection{Welfare and Policy Implications}
+\textbf{Connection to utility theory:} represent preferences as $U(c,|\ECB|)$ with $\partial U/\partial c>0$ and $\partial U/\partial |\ECB|>0$.\footnote{We assume separability for expositional clarity. More generally, $U(c,\ECB)$ could exhibit complementarity---consumption value may depend on feasible actions. This would strengthen rather than weaken the welfare-loss logic under ECB contraction.}
+Even if consumption $c$ remains constant, welfare decreases when $|\ECB|$ contracts.
+
+Define willingness-to-pay $v(x)$ to restore action $x$ to feasibility, and welfare loss from a latency increase:
+\[
+\Delta W=\sum_{x\in \ECB(\mathbf{L}_{\mathrm{low}})\setminus \ECB(\mathbf{L}_{\mathrm{high}})} v(x).
+\]
+Policy: reducing $\Leff$ (institutional responsiveness, settlement speed, permitting/court latency) may expand feasible action sets more than capital injections alone; remote-work policies may work for Type I activities but fail for Type III.
+
+% ----------------- References -----------------
+\begin{thebibliography}{99}
+
+\bibitem{acemoglu_johnson_2005}
+Acemoglu, D., \& Johnson, S. (2005).
+Unbundling institutions.
+\textit{Journal of Political Economy}, 113(5), 949--995.
+
+\bibitem{astrom_murray_2008}
+Åström, K. J., \& Murray, R. M. (2008).
+\textit{Feedback Systems: An Introduction for Scientists and Engineers}.
+Princeton University Press.
+
+\bibitem{bloom_etal_2015}
+Bloom, N., Liang, J., Roberts, J., \& Ying, Z. J. (2015).
+Does working from home work? Evidence from a Chinese experiment.
+\textit{Quarterly Journal of Economics}, 130(1), 165--218.
+
+\bibitem{coase_1937}
+Coase, R. H. (1937).
+The nature of the firm.
+\textit{Economica}, 4(16), 386--405.
+
+\bibitem{coval_moskowitz_1999}
+Coval, J. D., \& Moskowitz, T. J. (1999).
+Home bias at home: Local equity preference in domestic portfolios.
+\textit{Journal of Finance}, 54(6), 2045--2073.
+
+\bibitem{coval_moskowitz_2001}
+Coval, J. D., \& Moskowitz, T. J. (2001).
+The geography of investment: Informed trading and asset prices.
+\textit{Journal of Political Economy}, 109(4), 811--841.
+
+\bibitem{duranton_puga_2004}
+Duranton, G., \& Puga, D. (2004).
+Micro-foundations of urban agglomeration economies.
+In \textit{Handbook of Regional and Urban Economics} (Vol. 4).
+Elsevier.
+
+\bibitem{ellison_glaeser_kerr_2010}
+Ellison, G., Glaeser, E. L., \& Kerr, W. R. (2010).
+What causes industry agglomeration? Evidence from coagglomeration patterns.
+\textit{American Economic Review}, 100(3), 1195--1213.
+
+\bibitem{emanuel_harrington_2023}
+Emanuel, N., \& Harrington, E. (2023).
+Working remotely? Selection, treatment, and the market for remote work.
+\textit{Journal of Labor Economics} (forthcoming).
+
+\bibitem{franklin_etal_2015}
+Franklin, G. F., Powell, J. D., \& Emami-Naeini, A. (2015).
+\textit{Feedback Control of Dynamic Systems} (7th ed.).
+Pearson.
+
+\bibitem{galbraith_1973}
+Galbraith, J. R. (1973).
+\textit{Designing Complex Organizations}.
+Addison-Wesley.
+
+\bibitem{malone_crowston_1994}
+Malone, T. W., \& Crowston, K. (1994).
+The interdisciplinary study of coordination.
+\textit{ACM Computing Surveys}, 26(1), 87--119.
+
+\bibitem{milgrom_roberts_1992}
+Milgrom, P., \& Roberts, J. (1992).
+\textit{Economics, Organization and Management}.
+Prentice Hall.
+
+\bibitem{north_1990}
+North, D. C. (1990).
+\textit{Institutions, Institutional Change and Economic Performance}.
+Cambridge University Press.
+
+\bibitem{petersen_rajan_2002}
+Petersen, M. A., \& Rajan, R. G. (2002).
+Does distance still matter? The information revolution in small business lending.
+\textit{Journal of Finance}, 57(6), 2533--2570.
+
+\bibitem{spence_1973}
+Spence, M. (1973).
+Job market signaling.
+\textit{Quarterly Journal of Economics}, 87(3), 355--374.
+
+\bibitem{thompson_1967}
+Thompson, J. D. (1967).
+\textit{Organizations in Action}.
+McGraw-Hill.
+
+\bibitem{williamson_1985}
+Williamson, O. E. (1985).
+\textit{The Economic Institutions of Capitalism}.
+Free Press.
+
+\end{thebibliography}
+
+% ----------------- Appendices -----------------
+\appendix
+
+\section{Appendix D: Addressing Common Questions}
+\subsection*{Q1: Don't preferences explain relocation reversals?}
+Preference-based explanations predict correlation between stated preferences and reversals. ECB predicts reversals even when preferences are stable, distinguished by Type III exclusion patterns.
+
+\subsection*{Q2: Can't technology (video calls, async tools) offset latency?}
+For Type I/II actions, partially. For Type III actions requiring tight control loops, fundamental control-theoretic limits bind (Section~\ref{sec:control}), producing testable heterogeneity.
+
+\subsection*{Q3: Why doesn't capital enable technology adoption to reduce $\Leff$?}
+Technology reduces some components (communication delay) but not others (timezone misalignment, institutional response, settlement). For coordination-critical actions, remaining components can still push $\Leff$ beyond $L^*$.
+
+\subsection*{Q4: Is this just ``you can't be in two places at once''?}
+No. The contribution is quantitative: how much latency before which actions become infeasible, and why capital cannot compensate. Non-compensability (Proposition~\ref{prop:noncomp}) contradicts the intuition that ``money solves problems.''
+
+\subsection*{Q5: Does this apply to firms or only individuals?}
+It generalizes. Firms face internal coordination latency; large organizations may have higher effective $\Leff$ than small teams, yielding coordination diseconomies for iteration-intensive work.
 
 \end{document}
