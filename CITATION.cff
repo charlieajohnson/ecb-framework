@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+title: "Effective Capital Blueprint (ECB)"
+message: "If you use this framework, please cite this repository."
+type: software
+authors:
+  - family-names: Johnson
+    given-names: Charlie A.
+repository-code: "https://github.com/charlieajohnson/ecb-framework"
+license: MIT
