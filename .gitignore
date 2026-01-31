@@ -1,0 +1,22 @@
+# LaTeX
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.run.xml
+*.toc
+*.synctex.gz
+
+# PDFs (keep final memos only)
+docs/**/build/
+docs/**/out/
+
+# macOS
+.DS_Store
+
+# Editors
+.vscode/
